@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Voice Note</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A84FF'/%3E%3Cpath d='M32 14a7 7 0 0 0-7 7v11a7 7 0 0 0 14 0V21a7 7 0 0 0-7-7zm-12 18a12 12 0 0 0 24 0M32 44v7' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--sep:rgba(84,84,88,.6);
+    --text:#fff;--sub:rgba(235,235,245,.6);--blue:#0A84FF;--green:#30D158;--red:#FF453A;--tg:#2AABEE;--wa:#25D366;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
+  body{min-height:100vh;padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 16px)}
+  .wrap{max-width:520px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;margin:8px 0 18px}
+  h1{font-size:34px;font-weight:700;margin:0;letter-spacing:.2px}
+  .iconbtn{width:40px;height:40px;border-radius:20px;border:0;background:var(--card);display:grid;place-items:center;cursor:pointer}
+  .iconbtn svg{width:22px;height:22px}
+  .group{background:var(--card);border-radius:12px;overflow:hidden;margin-bottom:22px}
+  .label{font-size:13px;text-transform:uppercase;color:var(--sub);margin:0 0 7px 16px;letter-spacing:.3px}
+  .row{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:52px;width:100%;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  .row+.row{border-top:.5px solid var(--sep)}
+  .row .ic{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;flex:none}
+  .row .ic svg{width:18px;height:18px}
+  .row .t{flex:1;min-width:0}
+  .row .s{font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .chev{color:rgba(235,235,245,.3);font-size:22px}
+  .row[disabled]{opacity:.35;cursor:default}
+  .rec-on .ic{animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+  audio{width:100%;display:block;padding:12px 16px 14px}
+  .status{font-size:15px;color:var(--sub);text-align:center;min-height:22px;margin:-8px 0 18px;padding:0 8px}
+  .status.ok{color:var(--green)}.status.err{color:var(--red)}
+  .hint{font-size:13px;color:var(--sub);margin:-14px 16px 22px}
+  input[type=text],input[type=password]{width:100%;background:transparent;border:0;color:var(--text);font:inherit;padding:0;outline:none}
+  .field{padding:10px 16px}
+  .field+.field{border-top:.5px solid var(--sep)}
+  .field small{display:block;font-size:12px;color:var(--sub);margin-bottom:2px}
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+  .sheet.open{display:flex}
+  .panel{background:#000;width:100%;max-width:560px;border-radius:14px 14px 0 0;padding:16px calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 16px);max-height:92vh;overflow:auto}
+  .panel header{margin:0 0 18px}
+  .panel h2{font-size:17px;margin:0;font-weight:600}
+  .link{background:none;border:0;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;padding:6px 0}
+  .btn-blue{color:var(--blue)}
+  #file{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Voice Note</h1>
+    <button class="iconbtn" id="openSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </header>
+
+  <p class="label">Audio</p>
+  <div class="group">
+    <button class="row" id="pick">
+      <span class="ic" style="background:#0A84FF"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      <span class="t">Choose audio file<div class="s" id="fileName">MP3, M4A, WAV, OGG, video…</div></span>
+      <span class="chev">›</span>
+    </button>
+    <button class="row" id="rec">
+      <span class="ic" style="background:#FF453A"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg></span>
+      <span class="t" id="recLabel">Record now<div class="s" id="recSub">Use the microphone</div></span>
+    </button>
+  </div>
+  <input type="file" id="file" accept="audio/*,video/*,.opus,.ogg,.m4a,.aac,.amr">
+
+  <div class="status" id="status"></div>
+
+  <div id="out" style="display:none">
+    <p class="label">Preview · <span id="dur"></span></p>
+    <div class="group"><audio id="player" controls></audio></div>
+
+    <p class="label">Telegram</p>
+    <div class="group">
+      <button class="row" id="sendTg">
+        <span class="ic" style="background:var(--tg)"><svg viewBox="0 0 24 24" fill="#fff"><path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.2 13 1.4 11.5c-1-.3-1.1-1 .2-1.5L20.5 2.8c.9-.3 1.7.2 1.4 1.5z"/></svg></span>
+        <span class="t">Send to my bot<div class="s">Arrives as a voice note</div></span>
+        <span class="chev">›</span>
+      </button>
+      <button class="row" id="dlTg">
+        <span class="ic" style="background:#636366"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg></span>
+        <span class="t">Save Telegram file<div class="s">.ogg · Opus · 48 kHz mono</div></span>
+      </button>
+    </div>
+    <p class="hint">In the bot chat: long-press → Forward → pick chat → tap the forward bar → Hide sender's name.</p>
+
+    <p class="label">WhatsApp</p>
+    <div class="group">
+      <button class="row" id="dlWa">
+        <span class="ic" style="background:var(--wa)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg></span>
+        <span class="t">Save WhatsApp file<div class="s">PTT-….opus · Opus · mono</div></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="panel">
+    <header><h2>Settings</h2><button class="link" id="closeSettings">Done</button></header>
+    <p class="label">Telegram bot</p>
+    <div class="group">
+      <div class="field"><small>Bot token (from @BotFather)</small><input type="password" id="token" autocomplete="off" spellcheck="false" placeholder="123456789:AA…"></div>
+      <div class="field"><small>Chat ID</small><input type="text" id="chat" inputmode="numeric" autocomplete="off" placeholder="Tap “Find my chat ID”"></div>
+    </div>
+    <div class="group">
+      <button class="row btn-blue" id="findChat"><span class="t">Find my chat ID</span></button>
+    </div>
+    <p class="hint">Send any message to your bot first. Token and chat ID stay on this phone only.</p>
+    <div class="status" id="setStatus"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k){ try { return localStorage.getItem(k) || ''; } catch { return ''; } },
+    set(k,v){ try { localStorage.setItem(k,v); } catch {} }
+  };
+  let pcm = null;      // Float32Array mono 48k
+  let tgBlob = null, waBlob = null, srcName = 'audio';
+  let busy = false;
+
+  const status = (msg, cls='') => { const s=$('status'); s.textContent=msg; s.className='status '+cls; };
+  const pad = n => String(n).padStart(2,'0');
+
+  // ---------- settings ----------
+  $('token').value = store.get('vn_token');
+  $('chat').value = store.get('vn_chat');
+  $('token').oninput = e => store.set('vn_token', e.target.value.trim());
+  $('chat').oninput = e => store.set('vn_chat', e.target.value.trim());
+  $('openSettings').onclick = () => $('sheet').classList.add('open');
+  $('closeSettings').onclick = () => $('sheet').classList.remove('open');
+  $('sheet').onclick = e => { if (e.target === $('sheet')) $('sheet').classList.remove('open'); };
+  $('findChat').onclick = async () => {
+    const t = $('token').value.trim(), st = $('setStatus');
+    if (!t) { st.textContent='Enter the bot token first.'; st.className='status err'; return; }
+    st.textContent='Checking…'; st.className='status';
+    try {
+      const r = await (await fetch(`https://api.telegram.org/bot${t}/getUpdates`)).json();
+      if (!r.ok) throw new Error(r.description || 'Bad token');
+      const chats = r.result.map(u => (u.message||u.edited_message||{}).chat).filter(Boolean);
+      if (!chats.length) throw new Error('No messages yet. Send “hi” to your bot, then try again.');
+      const c = chats[chats.length-1];
+      $('chat').value = c.id; store.set('vn_chat', String(c.id));
+      st.textContent = `Found: ${c.first_name || c.title || ''} (${c.id})`; st.className='status ok';
+    } catch (e) { st.textContent = e.message; st.className='status err'; }
+  };
+
+  // ---------- input ----------
+  $('pick').onclick = () => $('file').click();
+  $('file').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    srcName = f.name.replace(/\.[^.]+$/,'');
+    $('fileName').textContent = f.name;
+    await load(await f.arrayBuffer());
+    e.target.value = '';
+  };
+
+  let rec = null, chunks = [], recTimer = null, recStart = 0;
+  $('rec').onclick = async () => {
+    if (rec) { rec.stop(); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+      chunks = [];
+      rec = new MediaRecorder(stream);
+      rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+      rec.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        clearInterval(recTimer); rec = null;
+        $('rec').classList.remove('rec-on');
+        $('recLabel').firstChild.textContent = 'Record now'; $('recSub').textContent = 'Use the microphone';
+        srcName = 'recording';
+        $('fileName').textContent = 'MP3, M4A, WAV, OGG, video…';
+        await load(await new Blob(chunks).arrayBuffer());
+      };
+      rec.start();
+      recStart = Date.now();
+      $('rec').classList.add('rec-on');
+      $('recLabel').firstChild.textContent = 'Stop recording';
+      recTimer = setInterval(() => { const s=Math.floor((Date.now()-recStart)/1000); $('recSub').textContent = `${Math.floor(s/60)}:${pad(s%60)}`; }, 250);
+      $('recSub').textContent = '0:00';
+    } catch (e) { status('Microphone not available: ' + e.message, 'err'); }
+  };
+
+  // ---------- decode + convert ----------
+  async function load(buf) {
+    if (busy) return; busy = true;
+    $('out').style.display = 'none';
+    try {
+      if (!('AudioEncoder' in window)) throw new Error('This browser can’t encode Opus. Use Chrome on Android or desktop.');
+      status('Converting…');
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const decoded = await ctx.decodeAudioData(buf.slice(0));
+      ctx.close();
+      const len = Math.ceil(decoded.duration * 48000);
+      const off = new OfflineAudioContext(1, len, 48000);
+      const src = off.createBufferSource(); src.buffer = decoded; src.connect(off.destination); src.start();
+      pcm = (await off.startRendering()).getChannelData(0);
+      tgBlob = await encodeOgg(pcm, {bitrate:32000, inputRate:48000});
+      waBlob = await encodeOgg(pcm, {bitrate:24000, inputRate:16000});
+      $('player').src = URL.createObjectURL(tgBlob);
+      const secs = pcm.length/48000;
+      $('dur').textContent = `${Math.floor(secs/60)}:${pad(Math.round(secs%60))}`;
+      $('out').style.display = '';
+      status('Ready', 'ok');
+    } catch (e) {
+      status('Couldn’t convert: ' + (e.message || e), 'err');
+    } finally { busy = false; }
+  }
+
+  async function encodeOgg(samples, {bitrate, inputRate}) {
+    const packets = [];
+    let desc = null;
+    const enc = new AudioEncoder({
+      output: (chunk, meta) => {
+        const b = new Uint8Array(chunk.byteLength); chunk.copyTo(b);
+        packets.push({data:b, dur: Math.round(chunk.duration * 48000 / 1e6) || 960});
+        if (meta && meta.decoderConfig && meta.decoderConfig.description && !desc) desc = new Uint8Array(meta.decoderConfig.description);
+      },
+      error: e => { throw e; }
+    });
+    const cfg = {codec:'opus', sampleRate:48000, numberOfChannels:1, bitrate, opus:{application:'voip', frameDuration:20000, format:'opus'}};
+    const sup = await AudioEncoder.isConfigSupported(cfg);
+    enc.configure(sup.supported ? cfg : {codec:'opus', sampleRate:48000, numberOfChannels:1, bitrate});
+    const step = 48000;
+    for (let i = 0; i < samples.length; i += step) {
+      const part = samples.subarray(i, Math.min(i+step, samples.length));
+      const ad = new AudioData({format:'f32-planar', sampleRate:48000, numberOfFrames:part.length, numberOfChannels:1, timestamp: Math.round(i/48*1000), data: part});
+      enc.encode(ad); ad.close();
+    }
+    await enc.flush(); enc.close();
+
+    let preSkip = 312;
+    if (desc && desc.length >= 19 && String.fromCharCode(...desc.slice(0,8)) === 'OpusHead') preSkip = desc[10] | (desc[11] << 8);
+    return muxOgg(packets, preSkip, samples.length, inputRate);
+  }
+
+  // ---------- Ogg Opus muxer ----------
+  const CRC = (() => { const t = new Uint32Array(256); for (let i=0;i<256;i++){ let r=i<<24; for (let j=0;j<8;j++) r = (r & 0x80000000) ? ((r<<1) ^ 0x04c11db7) : (r<<1); t[i]=r>>>0; } return t; })();
+  function crc32(b){ let c=0; for (let i=0;i<b.length;i++) c = ((c<<8) ^ CRC[((c>>>24) ^ b[i]) & 255]) >>> 0; return c; }
+
+  function muxOgg(packets, preSkip, numSamples, inputRate) {
+    const serial = (Math.random()*0xffffffff)>>>0;
+    const pages = []; let seq = 0;
+    const page = (pkts, granule, flags) => {
+      const segs = [];
+      for (const p of pkts) { let n = p.length; while (n >= 255) { segs.push(255); n -= 255; } segs.push(n); }
+      const bodyLen = pkts.reduce((a,p)=>a+p.length,0);
+      const out = new Uint8Array(27 + segs.length + bodyLen);
+      const dv = new DataView(out.buffer);
+      out.set([0x4f,0x67,0x67,0x53], 0); out[4]=0; out[5]=flags;
+      dv.setUint32(6, granule % 0x100000000, true); dv.setUint32(10, Math.floor(granule / 0x100000000), true);
+      dv.setUint32(14, serial, true); dv.setUint32(18, seq++, true); out[26] = segs.length;
+      out.set(segs, 27);
+      let o = 27 + segs.length; for (const p of pkts) { out.set(p, o); o += p.length; }
+      dv.setUint32(22, crc32(out), true);
+      pages.push(out);
+    };
+    const head = new Uint8Array(19), hv = new DataView(head.buffer);
+    head.set([...'OpusHead'].map(c=>c.charCodeAt(0))); head[8]=1; head[9]=1;
+    hv.setUint16(10, preSkip, true); hv.setUint32(12, inputRate, true); hv.setInt16(16, 0, true); head[18]=0;
+    page([head], 0, 0x02);
+    const vendor = new TextEncoder().encode('libopus 1.3.1');
+    const tags = new Uint8Array(8 + 4 + vendor.length + 4), tv = new DataView(tags.buffer);
+    tags.set([...'OpusTags'].map(c=>c.charCodeAt(0))); tv.setUint32(8, vendor.length, true); tags.set(vendor, 12); tv.setUint32(12+vendor.length, 0, true);
+    page([tags], 0, 0);
+    const end = preSkip + numSamples;
+    let granule = 0, buf = [], segCount = 0;
+    packets.forEach((p, i) => {
+      const segs = Math.floor(p.data.length/255) + 1;
+      if (buf.length && (segCount + segs > 255 || buf.length >= 50)) { page(buf, Math.min(granule, end), 0); buf=[]; segCount=0; }
+      buf.push(p.data); segCount += segs; granule += p.dur;
+    });
+    page(buf, Math.min(granule, end), 0x04);
+    return new Blob(pages, {type:'audio/ogg'});
+  }
+
+  // ---------- outputs ----------
+  function stamp() { const d=new Date(); return {d, ymd:`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`, hms:`${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`}; }
+  function save(blob, name) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  }
+  $('dlTg').onclick = () => { if (!tgBlob) return; const s=stamp(); save(tgBlob, `audio_${s.ymd}_${s.hms}.ogg`); };
+  $('dlWa').onclick = () => { if (!waBlob) return; const s=stamp(); save(waBlob, `PTT-${s.ymd.replace(/-/g,'')}-WA${pad(Math.floor(Math.random()*90)+10)}${pad(Math.floor(Math.random()*90)+10)}.opus`); };
+
+  $('sendTg').onclick = async () => {
+    if (!tgBlob || busy) return;
+    const t = store.get('vn_token') || $('token').value.trim(), c = store.get('vn_chat') || $('chat').value.trim();
+    if (!t || !c) { status('Add your bot token and chat ID in Settings.', 'err'); $('sheet').classList.add('open'); return; }
+    busy = true; status('Sending…');
+    try {
+      const s = stamp(), fd = new FormData();
+      fd.append('chat_id', c);
+      fd.append('duration', String(Math.max(1, Math.round(pcm.length/48000))));
+      fd.append('voice', tgBlob, `audio_${s.ymd}_${s.hms}.ogg`);
+      const r = await (await fetch(`https://api.telegram.org/bot${t}/sendVoice`, {method:'POST', body:fd})).json();
+      if (!r.ok) throw new Error(r.description);
+      status('Sent ✓ Open your bot chat to forward it.', 'ok');
+    } catch (e) { status('Send failed: ' + e.message, 'err'); }
+    finally { busy = false; }
+  };
+})();
+</script>
+</body>
+</html>
