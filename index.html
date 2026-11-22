@@ -96,6 +96,11 @@
 
     <p class="label">WhatsApp</p>
     <div class="group">
+      <button class="row" id="shareWa">
+        <span class="ic" style="background:var(--wa)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg></span>
+        <span class="t">Share to WhatsApp<div class="s">Pick WhatsApp, then the chat</div></span>
+        <span class="chev">›</span>
+      </button>
       <button class="row" id="dlWa">
         <span class="ic" style="background:var(--wa)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg></span>
         <span class="t">Save WhatsApp file<div class="s">PTT-….opus · Opus · mono</div></span>
@@ -293,7 +298,15 @@
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
   }
   $('dlTg').onclick = () => { if (!tgBlob) return; const s=stamp(); save(tgBlob, `audio_${s.ymd}_${s.hms}.ogg`); };
-  $('dlWa').onclick = () => { if (!waBlob) return; const s=stamp(); save(waBlob, `PTT-${s.ymd.replace(/-/g,'')}-WA${pad(Math.floor(Math.random()*90)+10)}${pad(Math.floor(Math.random()*90)+10)}.opus`); };
+  const waName = () => { const s=stamp(); return `PTT-${s.ymd.replace(/-/g,'')}-WA${pad(Math.floor(Math.random()*90)+10)}${pad(Math.floor(Math.random()*90)+10)}.opus`; };
+  $('dlWa').onclick = () => { if (waBlob) save(waBlob, waName()); };
+  $('shareWa').onclick = async () => {
+    if (!waBlob) return;
+    const f = new File([waBlob], waName(), {type:'audio/ogg'});
+    if (!(navigator.canShare && navigator.canShare({files:[f]}))) { status('Sharing not supported here — saved the file instead.', 'err'); save(waBlob, f.name); return; }
+    try { await navigator.share({files:[f]}); status('Shared ✓', 'ok'); }
+    catch (e) { if (e.name !== 'AbortError') status('Share failed: ' + e.message, 'err'); }
+  };
 
   $('sendTg').onclick = async () => {
     if (!tgBlob || busy) return;
